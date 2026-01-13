@@ -27,41 +27,44 @@ echo.
 echo  ========================================================
 echo  ^|                                                      ^|
 echo  ^|             SAMSUNG GALAXY POWER BYPASS TOOL         ^|
-echo  ^|                        v2.0                          ^|
+echo  ^|                        v2.1                          ^|
 echo  ========================================================
 echo.
-echo  Please choose an option:
+echo  Choose an action:
 echo.
-echo    [1] Enable Power Bypass ^& Disable GOS
-echo        (Reduces heat by bypassing the battery during gaming)
+echo    [1] Full Gaming Boost (Enable Bypass + Disable GOS stack)
+echo    [2] Restore Defaults (Disable Bypass + Enable GOS stack)
+echo    --------------------------------------------------------
+echo    [3] Enable Power Bypass only
+echo    [4] Disable Power Bypass only
+echo    [5] Disable Game Tools only
+echo    [6] Disable Game Launcher only
+echo    [7] Disable GOS only
+echo    [8] Enable Game Tools only
+echo    [9] Enable Game Launcher only
+echo    [10] Enable GOS only
+echo    --------------------------------------------------------
+echo    [11] Exit
 echo.
-echo    [2] Disable Power Bypass ^& Restore Defaults
-echo        (Returns charging and GOS to normal operation)
-echo.
-echo    [3] Exit
-echo.
-set /p choice="Enter your choice [1, 2, or 3]: "
+set /p choice="Enter your choice [1-11]: "
 
 if "%choice%"=="1" goto enable_bypass
 if "%choice%"=="2" goto disable_bypass
-if "%choice%"=="3" goto exit
+if "%choice%"=="3" goto enable_bypass_only
+if "%choice%"=="4" goto disable_bypass_only
+if "%choice%"=="5" goto disable_gametools_only
+if "%choice%"=="6" goto disable_gamehome_only
+if "%choice%"=="7" goto disable_gos_only
+if "%choice%"=="8" goto enable_gametools_only
+if "%choice%"=="9" goto enable_gamehome_only
+if "%choice%"=="10" goto enable_gos_only
+if "%choice%"=="11" goto exit
 
 echo Invalid choice. Please try again.
 timeout /t 2 >nul
 goto menu
 
-:enable_bypass
-cls
-echo.
-echo  ========================================================
-echo  ^|        ENABLING POWER BYPASS ^& DISABLING GOS        ^|
-echo  ========================================================
-echo.
-echo  (!) IMPORTANT: Please ensure your phone is connected to your PC
-echo      with USB Debugging enabled before continuing.
-echo.
-pause
-cls
+:ensure_device
 echo.
 echo  Waiting for ADB device...
 "%ADB_PATH%\adb.exe" wait-for-device
@@ -70,25 +73,97 @@ if errorlevel 1 (
     pause
     goto menu
 )
-echo  Device detected! Starting optimization process...
-echo.
-timeout /t 2 >nul
-echo  [1/4] Enabling Power Bypass...
+echo  Device detected!
+goto :eof
+
+:enable_pass_through
+echo  Enabling Power Bypass...
 "%ADB_PATH%\adb.exe" shell settings put system pass_through 1
+"%ADB_PATH%\adb.exe" shell settings put global pass_through 1
 echo      ^> DONE
 echo.
-echo  [2/4] Disabling Game Tools...
+echo  Verifying Power Bypass setting...
+for /f "usebackq delims=" %%a in (`"%ADB_PATH%\adb.exe" shell settings get system pass_through`) do set "PASS_THROUGH_SYSTEM=%%a"
+for /f "usebackq delims=" %%a in (`"%ADB_PATH%\adb.exe" shell settings get global pass_through`) do set "PASS_THROUGH_GLOBAL=%%a"
+if not "%PASS_THROUGH_SYSTEM%"=="1" if not "%PASS_THROUGH_GLOBAL%"=="1" (
+    echo      ^> WARNING: Power Bypass setting not detected.
+    echo      ^> This device may not support bypass charging (e.g., some S21 FE units).
+) else (
+    echo      ^> VERIFIED
+)
+echo.
+goto :eof
+
+:disable_pass_through
+echo  Disabling Power Bypass...
+"%ADB_PATH%\adb.exe" shell settings put system pass_through 0
+"%ADB_PATH%\adb.exe" shell settings put global pass_through 0
+echo      ^> DONE
+echo.
+goto :eof
+
+:disable_gametools
+echo  Disabling Game Tools...
 "%ADB_PATH%\adb.exe" shell pm disable-user com.samsung.android.game.gametools
 echo      ^> DONE
 echo.
-echo  [3/4] Disabling Game Launcher...
+goto :eof
+
+:enable_gametools
+echo  Enabling Game Tools...
+"%ADB_PATH%\adb.exe" shell pm enable com.samsung.android.game.gametools
+echo      ^> DONE
+echo.
+goto :eof
+
+:disable_gamehome
+echo  Disabling Game Launcher...
 "%ADB_PATH%\adb.exe" shell pm disable-user com.samsung.android.game.gamehome
 echo      ^> DONE
 echo.
-echo  [4/4] Disabling Game Optimization Service (GOS)...
+goto :eof
+
+:enable_gamehome
+echo  Enabling Game Launcher...
+"%ADB_PATH%\adb.exe" shell pm enable com.samsung.android.game.gamehome
+echo      ^> DONE
+echo.
+goto :eof
+
+:disable_gos
+echo  Disabling Game Optimization Service (GOS)...
 "%ADB_PATH%\adb.exe" shell pm disable-user com.samsung.android.game.gos
 echo      ^> DONE
 echo.
+goto :eof
+
+:enable_gos
+echo  Enabling Game Optimization Service (GOS)...
+"%ADB_PATH%\adb.exe" shell pm enable com.samsung.android.game.gos
+echo      ^> DONE
+echo.
+goto :eof
+
+:enable_bypass
+cls
+echo.
+echo  ========================================================
+echo  ^|        FULL GAMING BOOST - ENABLE BYPASS + GOS OFF  ^|
+echo  ========================================================
+echo.
+echo  (!) IMPORTANT: Please ensure your phone is connected to your PC
+echo      with USB Debugging enabled before continuing.
+echo.
+pause
+cls
+call :ensure_device
+echo  Starting optimization process...
+echo.
+timeout /t 2 >nul
+call :enable_pass_through
+call :disable_gametools
+call :disable_gamehome
+call :disable_gos
 echo  ========================================================
 echo  ^|         PROCESS COMPLETE - POWER BYPASS ENABLED      ^|
 echo  ========================================================
@@ -102,7 +177,7 @@ goto menu
 cls
 echo.
 echo  ========================================================
-echo  ^|       DISABLING POWER BYPASS ^& RESTORING DEFAULTS     ^|
+echo  ^|      RESTORE DEFAULTS - BYPASS OFF + GOS ON           ^|
 echo  ========================================================
 echo.
 echo  (!) IMPORTANT: Please ensure your phone is connected to your PC
@@ -110,33 +185,14 @@ echo      with USB Debugging enabled before continuing.
 echo.
 pause
 cls
-echo.
-echo  Waiting for ADB device...
-"%ADB_PATH%\adb.exe" wait-for-device
-if errorlevel 1 (
-    echo  ERROR: Could not connect to device. Please check USB connection and debugging.
-    pause
-    goto menu
-)
-echo  Device detected! Starting restoration process...
+call :ensure_device
+echo  Starting restoration process...
 echo.
 timeout /t 2 >nul
-echo  [1/4] Disabling Power Bypass...
-"%ADB_PATH%\adb.exe" shell settings put system pass_through 0
-echo      ^> DONE
-echo.
-echo  [2/4] Enabling Game Tools...
-"%ADB_PATH%\adb.exe" shell pm enable com.samsung.android.game.gametools
-echo      ^> DONE
-echo.
-echo  [3/4] Enabling Game Launcher...
-"%ADB_PATH%\adb.exe" shell pm enable com.samsung.android.game.gamehome
-echo      ^> DONE
-echo.
-echo  [4/4] Enabling Game Optimization Service (GOS)...
-"%ADB_PATH%\adb.exe" shell pm enable com.samsung.android.game.gos
-echo      ^> DONE
-echo.
+call :disable_pass_through
+call :enable_gametools
+call :enable_gamehome
+call :enable_gos
 echo  ========================================================
 echo  ^|      PROCESS COMPLETE - DEVICE RESTORED TO NORMAL    ^|
 echo  ========================================================
@@ -146,6 +202,157 @@ echo.
 pause
 goto menu
 
+:enable_bypass_only
+cls
+echo.
+echo  ========================================================
+echo  ^|              ENABLE POWER BYPASS ONLY               ^|
+echo  ========================================================
+echo.
+echo  (!) IMPORTANT: Please ensure your phone is connected to your PC
+echo      with USB Debugging enabled before continuing.
+echo.
+pause
+cls
+call :ensure_device
+echo.
+timeout /t 1 >nul
+call :enable_pass_through
+pause
+goto menu
+
+:disable_bypass_only
+cls
+echo.
+echo  ========================================================
+echo  ^|              DISABLE POWER BYPASS ONLY              ^|
+echo  ========================================================
+echo.
+echo  (!) IMPORTANT: Please ensure your phone is connected to your PC
+echo      with USB Debugging enabled before continuing.
+echo.
+pause
+cls
+call :ensure_device
+echo.
+timeout /t 1 >nul
+call :disable_pass_through
+pause
+goto menu
+
+:disable_gametools_only
+cls
+echo.
+echo  ========================================================
+echo  ^|               DISABLE GAME TOOLS ONLY               ^|
+echo  ========================================================
+echo.
+echo  (!) IMPORTANT: Please ensure your phone is connected to your PC
+echo      with USB Debugging enabled before continuing.
+echo.
+pause
+cls
+call :ensure_device
+echo.
+timeout /t 1 >nul
+call :disable_gametools
+pause
+goto menu
+
+:disable_gamehome_only
+cls
+echo.
+echo  ========================================================
+echo  ^|             DISABLE GAME LAUNCHER ONLY              ^|
+echo  ========================================================
+echo.
+echo  (!) IMPORTANT: Please ensure your phone is connected to your PC
+echo      with USB Debugging enabled before continuing.
+echo.
+pause
+cls
+call :ensure_device
+echo.
+timeout /t 1 >nul
+call :disable_gamehome
+pause
+goto menu
+
+:disable_gos_only
+cls
+echo.
+echo  ========================================================
+echo  ^|                DISABLE GOS ONLY                     ^|
+echo  ========================================================
+echo.
+echo  (!) IMPORTANT: Please ensure your phone is connected to your PC
+echo      with USB Debugging enabled before continuing.
+echo.
+pause
+cls
+call :ensure_device
+echo.
+timeout /t 1 >nul
+call :disable_gos
+pause
+goto menu
+
+:enable_gametools_only
+cls
+echo.
+echo  ========================================================
+echo  ^|                ENABLE GAME TOOLS ONLY               ^|
+echo  ========================================================
+echo.
+echo  (!) IMPORTANT: Please ensure your phone is connected to your PC
+echo      with USB Debugging enabled before continuing.
+echo.
+pause
+cls
+call :ensure_device
+echo.
+timeout /t 1 >nul
+call :enable_gametools
+pause
+goto menu
+
+:enable_gamehome_only
+cls
+echo.
+echo  ========================================================
+echo  ^|              ENABLE GAME LAUNCHER ONLY              ^|
+echo  ========================================================
+echo.
+echo  (!) IMPORTANT: Please ensure your phone is connected to your PC
+echo      with USB Debugging enabled before continuing.
+echo.
+pause
+cls
+call :ensure_device
+echo.
+timeout /t 1 >nul
+call :enable_gamehome
+pause
+goto menu
+
+:enable_gos_only
+cls
+echo.
+echo  ========================================================
+echo  ^|                 ENABLE GOS ONLY                     ^|
+echo  ========================================================
+echo.
+echo  (!) IMPORTANT: Please ensure your phone is connected to your PC
+echo      with USB Debugging enabled before continuing.
+echo.
+pause
+cls
+call :ensure_device
+echo.
+timeout /t 1 >nul
+call :enable_gos
+pause
+goto menu
+
 :exit
 exit
-

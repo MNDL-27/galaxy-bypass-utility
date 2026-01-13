@@ -69,7 +69,8 @@
 ## 📱 Device Compatibility
 
 **✅ Supported:** Galaxy S20/S21/S22/S23/S24 • Note 20 • Z Fold/Flip series  
-**❌ Not Supported:** Galaxy A/M series • Pre-2020 devices
+**❌ Not Supported:** Galaxy A/M series • Pre-2020 devices  
+**⚠️ Note:** Galaxy S21 FE cannot physically enable power bypass charging.
 
 **[🔍 Check full compatibility list →](https://github.com/MNDL-27/galaxy-bypass-utility/wiki/Device-Compatibility)**
 

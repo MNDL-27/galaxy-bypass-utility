@@ -92,6 +92,15 @@ if not "%PASS_THROUGH_SYSTEM%"=="1" if not "%PASS_THROUGH_GLOBAL%"=="1" (
     echo      ^> VERIFIED
 )
 echo.
+echo  --------------------------------------------------------
+echo  ^|  CHARGE LIMIT NOTICE                                ^|
+echo  --------------------------------------------------------
+echo  When Power Bypass is active, your battery will charge
+echo  up to 20%% and then stop. This is NORMAL and expected.
+echo  The charger powers the phone directly, keeping the
+echo  battery cool during gaming. This is not a bug.
+echo  --------------------------------------------------------
+echo.
 goto :eof
 
 :disable_pass_through

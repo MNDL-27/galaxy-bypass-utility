@@ -117,6 +117,11 @@
 - **🔄 Fully reversible** - all changes can be undone through the tool
 - **📱 S-series focus** - primarily designed for Galaxy S, Note, and Z series
 
+> ### 🔋 20% Charge Limit — This Is Normal!
+> When Power Bypass is enabled, your battery will charge up to **20% and then stop charging**. **This is expected behavior, not a bug.**
+> Samsung's bypass charging works by routing power from the charger directly to the phone's components, bypassing the battery. This keeps the battery cool during extended gaming sessions. Once bypass mode is active, the battery is intentionally held at ~20% so that charger power flows straight to the device instead of through the battery.
+> **To charge your battery normally again**, use option **[2] Restore Defaults** in the tool to disable bypass mode.
+
 ## 🤝 Community & Support
 
 - **🐛 [Report Issues](https://github.com/MNDL-27/galaxy-bypass-utility/issues)** - Bug reports and feature requests

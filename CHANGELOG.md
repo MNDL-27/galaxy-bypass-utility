@@ -5,6 +5,23 @@ All notable changes to Galaxy Bypass Utility will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-07-25
+
+### 🐛 Fixed
+- **Verification logic**: `pass_through` VERIFIED branch now prints correctly (was unreachable due to nested-if else pairing).
+- **Stale variables**: Clear `PASS_THROUGH_SYSTEM`/`PASS_THROUGH_GLOBAL` before re-read to prevent false-positive VERIFIED when adb returns empty.
+- **Variable leakage**: Added `setlocal` to prevent script vars from leaking into parent shell.
+- **Device wait UX**: Added Ctrl+C hint to `wait-for-device` message.
+
+### 📚 Added
+- `ADB_SETUP.md`: USB debugging setup guide (was missing from repo despite CHANGELOG reference).
+- `_test/`: Mock-ADB test harness — `run_tests.bat` exercises verification logic with stub adb. Windows-only.
+
+### 🔄 Changed
+- `IDEA.md`: Replaced unrelated SOCKS5/DPI tunnel draft with accurate project roadmap.
+
+---
+
 ## [2.0.0] - 2025-09-28
 
 ### 🚀 Added

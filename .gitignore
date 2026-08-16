@@ -16,3 +16,6 @@ $RECYCLE.BIN/
 
 # ADB Platform Tools (uncomment to exclude ADB files if desired)
 # adb/
+
+# Design exploration (parallel UI mockups, not part of current CLI tool)
+opendesign/

@@ -1,4 +1,5 @@
 @echo off
+setlocal
 cls
 title Samsung Galaxy Power Bypass Tool
 
@@ -27,7 +28,7 @@ echo.
 echo  ========================================================
 echo  ^|                                                      ^|
 echo  ^|             SAMSUNG GALAXY POWER BYPASS TOOL         ^|
-echo  ^|                        v2.1                          ^|
+echo  ^|                        v2.2                          ^|
 echo  ========================================================
 echo.
 echo  Choose an action:
@@ -66,7 +67,7 @@ goto menu
 
 :ensure_device
 echo.
-echo  Waiting for ADB device...
+echo  Waiting for ADB device... (press Ctrl+C to cancel)
 "%ADB_PATH%\adb.exe" wait-for-device
 if errorlevel 1 (
     echo  ERROR: Could not connect to device. Please check USB connection and debugging.
@@ -83,11 +84,16 @@ echo  Enabling Power Bypass...
 echo      ^> DONE
 echo.
 echo  Verifying Power Bypass setting...
+set "PASS_THROUGH_SYSTEM="
+set "PASS_THROUGH_GLOBAL="
 for /f "usebackq delims=" %%a in (`"%ADB_PATH%\adb.exe" shell settings get system pass_through`) do set "PASS_THROUGH_SYSTEM=%%a"
 for /f "usebackq delims=" %%a in (`"%ADB_PATH%\adb.exe" shell settings get global pass_through`) do set "PASS_THROUGH_GLOBAL=%%a"
-if not "%PASS_THROUGH_SYSTEM%"=="1" if not "%PASS_THROUGH_GLOBAL%"=="1" (
+set "BYPASS_OK=0"
+if "%PASS_THROUGH_SYSTEM%"=="1" set "BYPASS_OK=1"
+if "%PASS_THROUGH_GLOBAL%"=="1" set "BYPASS_OK=1"
+if "%BYPASS_OK%"=="0" (
     echo      ^> WARNING: Power Bypass setting not detected.
-    echo      ^> This device may not support bypass charging (e.g., some S21 FE units).
+    echo      ^> This device may not support bypass charging ^(e.g., some S21 FE units^).
 ) else (
     echo      ^> VERIFIED
 )
